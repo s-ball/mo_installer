@@ -3,7 +3,7 @@ from distutils.command.build import build as _build
 from distutils.cmd import Command
 
 class build(_build):
-    parent = None
+    parent = _build
     def run(self):
         build_py.parent = (self.distribution.cmdclass["build_py"]
                            if ("build_py" in self.distribution.cmdclass)

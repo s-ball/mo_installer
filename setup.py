@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 from pkg_resources import parse_version, get_distribution
 import os.path
 
-NAME = "mo-installer"
+NAME = "mo_installer"
 
 # Base version (removes any pre, post, a, b or rc element)
 try:
@@ -47,15 +47,14 @@ setup(
         "Topic :: Software Development :: Internationalization",
         ],
     python_requires=">=3",
-#    test_suite = "tests",
     entry_points = {
         "distutils.commands": [
-#            "build = mo-installer.builder:build",
-#            "build_mo = mo-installer.builder:build_mo",
+            "build = mo_installer.builder:build",
+            "build_mo = mo_installer.builder:build_mo",
             ],
         "distutils.setup_keywords": [
-##            "locale_src = mo-installer.builder:validate_src",
-##            "locale_dir = mo-installer.builder:validate_src",
+            "locale_src = mo_installer.builder:validate_src",
+            "locale_dir = mo_installer.builder:validate_dir",
             ]
         },
     )
