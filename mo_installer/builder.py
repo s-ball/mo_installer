@@ -36,11 +36,13 @@ class build_mo(Command):
         self.ensure_dirname("locale_dir")
 
     def run(self):
-        po_loc = re.compile(r"(.*)_(.*)\.po$")
+        self.announce("Compiling from {} to {}".format(self.locale_src,
+                                                       self.locale_dir))
+        po_loc = re.compile(r"(.*)-(.*)\.po$")
         po = re.compile(r"(.*)\.po$")
-        for locale in os.listdir(locale_src):
+        for locale in os.listdir(self.locale_src):
             if locale[0] == '.': continue
-            path = os.path.join(local_src, locale)
+            path = os.path.join(self.locale_src, locale)
             if os.is_dir(path):
                 for file in os.listdir(path):
                     m = po.match(file)
@@ -54,7 +56,7 @@ class build_mo(Command):
 
     def process(self, path, domain, locale):
         self.files.append(path)
-        dest = os.path.join(self.build_lib, locale_dir, locale,
+        dest = os.path.join(self.build_lib, self.locale_dir, locale,
                             "LC_MESSAGES")
         self.mkpath(dest)
         if not self.dry_run:
