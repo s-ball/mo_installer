@@ -7,11 +7,90 @@ Help to install gettext mo file in a setuptools package.
 Current status
 --------------
 
-This package is currently a work in progress (pre-alpha)
+This package is fully functional, but should still be considered as beta because it has not been enough tested
 
 Goals
 -----
 
-`setuptools` has currently little support for `gettext` mo files generation and packaging. babel_ provides a nice integration, but is a rather large package. This intends to be a small package with examples in order to help developpers to smoothly integrate `gettext` internationlization in their packages.
+`setuptools` has currently little support for `gettext` mo files generation and packaging. babel_ provides a nice integration, but is a rather large package. This intends to be a small package with examples in order to help developpers to smoothly integrate `gettext` internationalization in their packages.
+
+Usage
+-----
+
+To have mo file generation at build time, a package developper only has to:
+
+* prepare its po files somewhere in a directory. Under that directory, the po files can be installed:
+
+  * directly in the directory with a name like ``domain-lang.po`` (ex: ``msg-fr_FR.po``)
+  * in a ``lang`` sub-directory like ``lang/domain.po`` (ex: ``fr/msg.po``)
+  * in a ``LC_MESSAGES`` sub-directory like ``lang/LC_MESSAGES/domain.po`` (ex: ``fr/LC_MESSAGES/msg.po``)
+
+* declare in its ``setup.py`` that he wants to use ``mo_installer``, and where the po files are::
+
+    setup(
+        ...
+        setup_require = ["mo_installer"],
+        locale_src = src_locale_top_level_dir,
+    )
+
+and that's all!
+
+The ``mo_installer`` module automatically adds a ``build_mo`` setuptools command that is automatically called from ``build_py``. It builds the mo files and installs them under the main package in a ``locale/lang/LC_MESSAGES`` folder. So, in the above examples, we end with a ``locale/lang/LC_MESSAGES/msg.mo`` file.
+
+Configuration
+-------------
+
+The source and destination folders can be configured with ``setup`` parameters:
+
+* ``locale_src`` is the source directory (relative to the source installation, i.e. the directory containing the ``setup.py`` file). By default it is ``locale`` under the main package
+* ``locale_dir`` is the top level locale directory (relative to the main package). By default it is ``locale``.
+
+The defaults try to be compatible with babel_.
+
+Installing
+----------
+
+End user installation
+*********************
+
+The package can be installed from `PyPI <https://pypi.org/project/mo_installer>`_. But installation is not required: ``setup_require`` automatically finds the package and installs it in the local ``.eggs`` directory
+
+Developper installation
+***********************
+
+If you want to contribute or integrate mo_installer in your own code, you should get a copy of the full tree from `GitHUB <https://github.com/s-ball/pyimgren>`_::
+
+  git clone https://github.com/s-ball/pyimgren [your_working_copy_folder]
+
+
+Running the tests
+-----------------
+
+As the project intends to be PyPI compatible, you can simply run tests from the main folder with::
+
+  python setup.py test
+
+Some tests depend on [pyfakefs](http://pyfakefs.org), which is automatically intalled from PyPI when you run `python setup.py test`. But it is not require for using ``mo_installer``, nor installed by ``pip install mo_installer``.
+
+Contributing
+------------
+
+As this project is developped on my free time, I cannot guarantee very fast feedbacks. Anyway, I shall be glad to receive issues or pull requests on GitHUB. 
+
+Versioning
+----------
+
+This project uses a standard Major.Minor.Patch versioning pattern. Inside a major version, public API stability is expected (at least after 1.0.0 version will be published).
+
+License
+-------
+
+This project is licensed under the MIT License - see the LICENSE_ file for details
+
+Acknowledgments
+---------------
+
+* The excellent [pyfakefs](http://pyfakefs.org), allows integration tests to run on a fake file system
 
 .. _babel_http://babel.pocoo.org/
+.. _LICENSE_https://github.com/s-ball/mo_installer/blob/master/LICENSE
