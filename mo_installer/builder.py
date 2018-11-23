@@ -5,12 +5,12 @@ from distutils.cmd import Command
 class build(_build):
     parent = _build
     def run(self):
-        build_py.parent = (self.distribution.cmdclass["build_py"]
-                           if ("build_py" in self.distribution.cmdclass)
-                           else _build)
+        if "build_py" in self.distribution.cmdclass:
+            build_py.parent = self.distribution.cmdclass["build_py"]
         self.parent.run(self)
         
 class build_py(_build_py):
+    parent = _build_py
     def run(self):
         self.run_command("build_mo")
         self.parent.run(self)
@@ -45,10 +45,19 @@ class build_mo(Command):
             path = os.path.join(self.locale_src, locale)
             if os.is_dir(path):
                 for file in os.listdir(path):
-                    m = po.match(file)
-                    if m:
-                        self.process(os.path.join(path, file),
-                                     m.group(1), locale)
+                    if file == "LC_MESSAGES" and os.isdir(
+                        os.path.join(path, file)):
+                        lcm = os.path.join(path, file)
+                        for file in os.listdir(lcm):
+                            m = po.match(file)
+                            if m:
+                                self.process(os.path.join(path, file),
+                                             m.group(1), locale)
+                    else:        
+                        m = po.match(file)
+                        if m:
+                            self.process(os.path.join(path, file),
+                                         m.group(1), locale)
             else:
                 m = po_loc.match(file)
                 if m:

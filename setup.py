@@ -57,4 +57,5 @@ setup(
             "locale_dir = mo_installer.builder:validate_dir",
             ]
         },
+    test_suite = "tests",
     )
