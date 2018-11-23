@@ -44,9 +44,9 @@ class BuildMoTest(TestCase):
 
     def test_finalize_no_isdir(self):
         self.dist.locale_src = "foo"
-        err = r".*'locale_src'.*'foo'"
-        with self.assertRaisesRegex(DistutilsOptionError, err):
-            self.obj.finalize_options()
+        self.obj.finalize_options()
+        self.obj.run()
+        self.assertEqual(0, len(self.obj.get_outputs()))
 
     def test_process(self):
         self.obj.finalize_options()

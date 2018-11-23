@@ -47,12 +47,12 @@ class build_mo(Command):
         self.locale_src = self.distribution.locale_src
         if self.locale_src is None:
             self.locale_src = os.path.join(name, "locale")
-        self.ensure_dirname("locale_src")
         self.locale_dir = self.distribution.locale_dir
         if self.locale_dir is None:
             self.locale_dir = os.path.join(name, "locale")
 
     def run(self):
+        if not os.path.isdir(self.locale_src): return
         self.announce("Compiling from {} to {}".format(self.locale_src,
                                                        self.locale_dir))
         po_loc = re.compile(r"(.*)-(.*)\.po$")
