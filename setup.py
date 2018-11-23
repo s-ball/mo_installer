@@ -20,7 +20,7 @@ setup(
     name=NAME,
     description = "Smoothly integrates mo files in setuptools packaging",
     long_description = long_description,
-    packages = [NAME],
+    packages = find_packages(exclude=["tests"]),
     setup_requires = ["setuptools_scm"],
     use_scm_version = { "write_to": os.path.join(NAME, 'version.py') },
     author="s-ball",
