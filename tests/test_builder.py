@@ -42,5 +42,4 @@ class BuildPyTest(TestCase):
             self.obj.run()
             run.assert_called_once_with(self.obj)
             run_cmd.assert_called_once_with("build_mo")
-        
-    
+     

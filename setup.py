@@ -47,6 +47,7 @@ setup(
         "Topic :: Software Development :: Internationalization",
         ],
     python_requires=">=3",
+    tests_require = ["pyfakefs"],
     entry_points = {
         "distutils.commands": [
             "build = mo_installer.builder:build",

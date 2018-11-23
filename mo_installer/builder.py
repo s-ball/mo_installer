@@ -1,6 +1,9 @@
 from setuptools.command.build_py import build_py as _build_py
 from distutils.command.build import build as _build
 from distutils.cmd import Command
+from .vendor import msgfmt
+import os.path
+import re
 
 class build(_build):
     parent = _build
@@ -23,6 +26,7 @@ class build_py(_build_py):
 class build_mo(Command):
     def initialize_options(self):
         self.outputs = []
+        self.build_lib = None
 
     def finalize_options(self):
         name = self.distribution.get_name()
@@ -34,6 +38,7 @@ class build_mo(Command):
         if self.locale_dir is None:
             self.locale_dir = os.path.join(name, "locale")
         self.ensure_dirname("locale_dir")
+        self.build_lib = self.distribution.build_lib
 
     def run(self):
         self.announce("Compiling from {} to {}".format(self.locale_src,
@@ -43,15 +48,15 @@ class build_mo(Command):
         for locale in os.listdir(self.locale_src):
             if locale[0] == '.': continue
             path = os.path.join(self.locale_src, locale)
-            if os.is_dir(path):
+            if os.path.isdir(path):
                 for file in os.listdir(path):
-                    if file == "LC_MESSAGES" and os.isdir(
+                    if file == "LC_MESSAGES" and os.path.isdir(
                         os.path.join(path, file)):
                         lcm = os.path.join(path, file)
                         for file in os.listdir(lcm):
                             m = po.match(file)
                             if m:
-                                self.process(os.path.join(path, file),
+                                self.process(os.path.join(lcm, file),
                                              m.group(1), locale)
                     else:        
                         m = po.match(file)
@@ -59,17 +64,17 @@ class build_mo(Command):
                             self.process(os.path.join(path, file),
                                          m.group(1), locale)
             else:
-                m = po_loc.match(file)
+                m = po_loc.match(locale)
                 if m:
                     self.process(path, m.group(1), m.group(2))
 
     def process(self, path, domain, locale):
-        self.files.append(path)
         dest = os.path.join(self.build_lib, self.locale_dir, locale,
                             "LC_MESSAGES")
         self.mkpath(dest)
+        file = os.path.join(dest, domain + ".mo")
+        self.outputs.append(file)
         if not self.dry_run:
-            file = os.path.join(dest, domain + ".mo")
             msgfmt.make(path, file)
             
     def get_outputs(self):
