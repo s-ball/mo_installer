@@ -12,7 +12,7 @@ This package is fully functional, but should still be considered as beta because
 Goals
 -----
 
-`setuptools` has currently little support for `gettext` mo files generation and packaging. babel_ provides a nice integration, but is a rather large package. This intends to be a small package with examples in order to help developpers to smoothly integrate `gettext` internationalization in their packages.
+``setuptools`` has currently little support for ``gettext`` mo files generation and packaging. babel_ provides a nice integration, but is a rather large package. This intends to be a small package with examples in order to help developpers to smoothly integrate ``gettext`` internationalization in their packages.
 
 Usage
 -----
@@ -45,7 +45,7 @@ The source and destination folders can be configured with ``setup`` parameters:
 * ``locale_src`` is the source directory (relative to the source installation, i.e. the directory containing the ``setup.py`` file). By default it is ``locale`` under the main package
 * ``locale_dir`` is the top level locale directory (relative to the main package). By default it is ``locale``.
 
-The defaults try to be compatible with babel_.
+The defaults try to be compatible with babel_ .
 
 Installing
 ----------
@@ -58,9 +58,9 @@ The package can be installed from `PyPI <https://pypi.org/project/mo_installer>`
 Developper installation
 ***********************
 
-If you want to contribute or integrate mo_installer in your own code, you should get a copy of the full tree from `GitHUB <https://github.com/s-ball/pyimgren>`_::
+If you want to contribute or integrate mo_installer in your own code, you should get a copy of the full tree from `GitHUB <https://github.com/s-ball/mo_installer>`_::
 
-  git clone https://github.com/s-ball/pyimgren [your_working_copy_folder]
+  git clone https://github.com/s-ball/mo_installer.git [your_working_copy_folder]
 
 
 Running the tests
@@ -70,7 +70,7 @@ As the project intends to be PyPI compatible, you can simply run tests from the 
 
   python setup.py test
 
-Some tests depend on [pyfakefs](http://pyfakefs.org), which is automatically intalled from PyPI when you run `python setup.py test`. But it is not require for using ``mo_installer``, nor installed by ``pip install mo_installer``.
+Some tests depend on pyfakefs_, which is automatically intalled from PyPI when you run `python setup.py test`. But it is not require for using ``mo_installer``, nor installed by ``pip install mo_installer``.
 
 Contributing
 ------------
@@ -90,7 +90,8 @@ This project is licensed under the MIT License - see the LICENSE_ file for detai
 Acknowledgments
 ---------------
 
-* The excellent [pyfakefs](http://pyfakefs.org), allows integration tests to run on a fake file system
+* The excellent pyfakefs_ allows integration tests to run on a fake file system
 
-.. _babel_http://babel.pocoo.org/
-.. _LICENSE_https://github.com/s-ball/mo_installer/blob/master/LICENSE
+.. _babel: http://babel.pocoo.org/
+.. _LICENSE: https://github.com/s-ball/mo_installer/blob/master/LICENSE
+.. _pyfakefs: http://pyfakefs.org
