@@ -26,7 +26,7 @@ class BuildMoTest(TestCase):
         self.obj.initialize_options()
         self.fs.create_dir("/tst/locale")
         self.fs.create_dir("/build")
-        self.dist.build_lib = "/build"
+        self.obj.build_lib = "/build"
 
     def tearDown(self):
         pass
@@ -43,8 +43,8 @@ class BuildMoTest(TestCase):
         self.assertEqual("/orig", self.obj.locale_src)
 
     def test_finalize_no_isdir(self):
-        self.dist.locale_dir = "foo"
-        err = r".*'locale_dir'.*'foo'"
+        self.dist.locale_src = "foo"
+        err = r".*'locale_src'.*'foo'"
         with self.assertRaisesRegex(DistutilsOptionError, err):
             self.obj.finalize_options()
 
@@ -100,7 +100,7 @@ class BuildMoTest(TestCase):
         shutil.copyfile("/orig/msg-fr.po", "/src/fr_FR/msg.po")
         shutil.copyfile("/orig/msg-fr.po", "/src/msg-fr_BE.po")
         self.fs.create_dir("/build2")
-        self.dist.build_lib = "/build2"
+        self.obj.build_lib = "/build2"
         self.obj.finalize_options()
         with patch("mo_installer.builder.msgfmt.make") as make:
             self.obj.run()

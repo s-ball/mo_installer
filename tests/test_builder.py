@@ -20,6 +20,7 @@ class BuildTest(TestCase):
             self.obj.run()
             run.assert_called_once_with(self.obj)
         self.assertEqual(builder._build_py, build_py.parent)
+        self.assertEqual(build_py, self.dist.cmdclass["build_py"])
 
     def test_previous(self):
         self.dist.cmdclass["build_py"] = Command
@@ -27,6 +28,7 @@ class BuildTest(TestCase):
             self.obj.run()
             run.assert_called_once_with(self.obj)
         self.assertEqual(Command, build_py.parent)
+        self.assertEqual(build_py, self.dist.cmdclass["build_py"])
 
 class BuildPyTest(TestCase):
     def setUp(self):
