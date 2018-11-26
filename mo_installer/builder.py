@@ -24,7 +24,7 @@ class build_py(_build_py):
         
     def get_outputs(self):
         build_mo = self.get_finalized_command("build_mo")
-        return _build.get_outputs(self) + build_mo.get_outputs()
+        return _build_py.get_outputs(self) + build_mo.get_outputs()
 
 
 class build_mo(Command):

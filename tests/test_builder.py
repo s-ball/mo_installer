@@ -44,4 +44,17 @@ class BuildPyTest(TestCase):
             self.obj.run()
             run.assert_called_once_with(self.obj)
             run_cmd.assert_called_once_with("build_mo")
-     
+
+    def test_get_outputs(self):
+        with patch("distutils.command.build_py.build_py.get_outputs") \
+                 as out, \
+             patch("mo_installer.builder._build_py.get_finalized_command") \
+                 as cmd:
+            out.return_value = ["foo"]
+            mo = Mock("mo_install.builder.build_mo")
+            mo.get_outputs = Mock(return_value = ["bar"])
+            cmd.return_value = mo
+            l = self.obj.get_outputs()
+            self.assertEqual(2, len(l))
+            self.assertTrue("foo" in l)
+            self.assertTrue("bar" in l)
