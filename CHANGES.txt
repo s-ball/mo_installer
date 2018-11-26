@@ -1,3 +1,6 @@
+0.2.2 Fix on 0.2
+Clean the source distribution
+
 0.2.0 First fully functional version
 Add tests
 Deploy on PyPI

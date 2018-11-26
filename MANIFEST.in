@@ -1,3 +1,4 @@
 global-exclude *.swp *~ *.mo
-include CHANGES*
+include CHANGES.txt
 exclude .gitignore
+prune mo_installer.egg-info
