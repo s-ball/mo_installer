@@ -1,3 +1,9 @@
+0.3.0 Use a fixed version of msgfmt.py
+Because of bpo-9741, msgfmt.py repeated translations of previous po file
+in following mo ones.
+mo_installer now uses distutils.cmd.make_files to observe force and verbose
+flags.
+
 0.2.2 Fix on 0.2
 Clean the source distribution
 
