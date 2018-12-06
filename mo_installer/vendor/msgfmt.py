@@ -1,13 +1,14 @@
 #! /usr/bin/env python3
 # Written by Martin v. Löwis <loewis@informatik.hu-berlin.de>
-
+# Version 1.3 by s-ball <s-ball@laposte.net>
 """Generate binary message catalog from textual translation description.
 
 This program converts a textual Uniforum-style message catalog (.po file) into
 a binary GNU catalog (.mo file).  This is essentially the same function as the
-GNU msgfmt program, however, it is a simpler implementation.
+GNU msgfmt program, however, it is a simpler implementation.  Currently it
+handles plural forms and message contexts, but does not generate hash table.
 
-Usage: msgfmt.py [OPTIONS] filename.po
+Usage: msgfmt.py [OPTIONS] filename.po [filename.po ...]
 
 Options:
     -o file
@@ -22,6 +23,14 @@ Options:
     -V
     --version
         Display version information and exit.
+
+If more than one input file is given, and if an output file is passed with
+-o option, then all the input files are merged. If keys are repeated (common
+for "" key for the header) the one from last file is used.
+
+If more than one input file is given, and no -o option is present, then
+every input file is compiled in its corresponding mo file (same name with mo
+replacing po)
 """
 
 import os
@@ -32,12 +41,11 @@ import struct
 import array
 from email.parser import HeaderParser
 
-__version__ = "1.1"
+__version__ = "1.3"
 
 MESSAGES = {}
 
 
-
 def usage(code, msg=''):
     print(__doc__, file=sys.stderr)
     if msg:
@@ -45,28 +53,27 @@ def usage(code, msg=''):
     sys.exit(code)
 
 
-
-def add(id, str, fuzzy):
+def add(ctxt, id, str, fuzzy, messages):
     "Add a non-fuzzy translation to the dictionary."
-    global MESSAGES
     if not fuzzy and str:
-        MESSAGES[id] = str
+        if ctxt is None:
+            messages[id] = str
+        else:
+            messages[b"%b\x04%b" % (ctxt, id)] = str
 
 
-
-def generate():
+def generate(messages):
     "Return the generated output."
-    global MESSAGES
     # the keys are sorted in the .mo file
-    keys = sorted(MESSAGES.keys())
+    keys = sorted(messages.keys())
     offsets = []
     ids = strs = b''
     for id in keys:
         # For each string, we need size and file offset.  Each string is NUL
         # terminated; the NUL does not count into the size.
-        offsets.append((len(ids), len(id), len(strs), len(MESSAGES[id])))
+        offsets.append((len(ids), len(id), len(strs), len(messages[id])))
         ids += id + b'\0'
-        strs += MESSAGES[id] + b'\0'
+        strs += messages[id] + b'\0'
     output = ''
     # The header is 7 32-bit unsigned integers.  We don't use hash tables, so
     # the keys start right after the index tables.
@@ -95,11 +102,30 @@ def generate():
     return output
 
 
-
-def make(filename, outfile):
-    ID = 1
-    STR = 2
+def make(filenames, outfile):
+    """This function is now member of the public interface.
+    filenames is a string or an iterable of strings representing input file(s)
+    outfile is a string for the name of an input file or None.
 
+    If it is not None, the output file receives a merge of the input files
+    If it is None, then filenames must be a string and the name of the output
+    file is obtained by replacing the po extension with mo.
+    Both ways are for compatibility reasons with previous behaviour.
+    """
+    messages = {}
+    if isinstance(filenames, str):
+        infile, outfile = get_names(filenames, outfile)
+        process(infile, messages)
+    elif outfile is None:
+        raise TypeError("outfile cannot be None with more than one infile")
+    else:
+        for filename in filenames:
+            infile, _ = get_names(filename, outfile)
+            process(infile, messages)
+    output = generate(messages)
+    writefile(outfile, output)
+
+def get_names(filename, outfile):
     # Compute .mo name from .po name and arguments
     if filename.endswith('.po'):
         infile = filename
@@ -107,6 +133,12 @@ def make(filename, outfile):
         infile = filename + '.po'
     if outfile is None:
         outfile = os.path.splitext(infile)[0] + '.mo'
+    return infile, outfile
+
+def process(infile, messages):
+    ID = 1
+    STR = 2
+    CTXT = 3
 
     try:
         with open(infile, 'rb') as f:
@@ -115,7 +147,7 @@ def make(filename, outfile):
         print(msg, file=sys.stderr)
         sys.exit(1)
 
-    section = None
+    section = msgctxt = None
     fuzzy = 0
 
     # Start off assuming Latin-1, so everything decodes without failure,
@@ -129,8 +161,8 @@ def make(filename, outfile):
         lno += 1
         # If we get a comment line after a msgstr, this is a new entry
         if l[0] == '#' and section == STR:
-            add(msgid, msgstr, fuzzy)
-            section = None
+            add(msgctxt, msgid, msgstr, fuzzy, messages)
+            section = msgctxt = None
             fuzzy = 0
         # Record a fuzzy mark
         if l[:2] == '#,' and 'fuzzy' in l:
@@ -138,10 +170,16 @@ def make(filename, outfile):
         # Skip comments
         if l[0] == '#':
             continue
-        # Now we are in a msgid section, output previous section
-        if l.startswith('msgid') and not l.startswith('msgid_plural'):
+        # Now we are in a msgid or msgctxt section, output previous section
+        if l.startswith('msgctxt'):
             if section == STR:
-                add(msgid, msgstr, fuzzy)
+                add(msgctxt, msgid, msgstr, fuzzy, messages)
+            section = CTXT
+            l = l[7:]
+            msgctxt = b''
+        elif l.startswith('msgid') and not l.startswith('msgid_plural'):
+            if section == STR:
+                add(msgctxt, msgid, msgstr, fuzzy, messages)
                 if not msgid:
                     # See whether there is an encoding declaration
                     p = HeaderParser()
@@ -183,7 +221,9 @@ def make(filename, outfile):
         if not l:
             continue
         l = ast.literal_eval(l)
-        if section == ID:
+        if section == CTXT:
+            msgctxt += l.encode(encoding)
+        elif section == ID:
             msgid += l.encode(encoding)
         elif section == STR:
             msgstr += l.encode(encoding)
@@ -194,11 +234,9 @@ def make(filename, outfile):
             sys.exit(1)
     # Add last entry
     if section == STR:
-        add(msgid, msgstr, fuzzy)
+        add(msgctxt, msgid, msgstr, fuzzy, messages)
 
-    # Compute output
-    output = generate()
-
+def writefile(outfile, output):
     try:
         with open(outfile,"wb") as f:
             f.write(output)
@@ -206,10 +244,9 @@ def make(filename, outfile):
         print(msg, file=sys.stderr)
 
 
-
-def main():
+def main(argv):
     try:
-        opts, args = getopt.getopt(sys.argv[1:], 'hVo:',
+        opts, args = getopt.getopt(argv, 'hVo:',
                                    ['help', 'version', 'output-file='])
     except getopt.error as msg:
         usage(1, msg)
@@ -229,10 +266,12 @@ def main():
         print('No input file given', file=sys.stderr)
         print("Try `msgfmt --help' for more information.", file=sys.stderr)
         return
-
-    for filename in args:
-        make(filename, outfile)
+    if outfile is None:
+        for filename in args:
+            make(filename, None)
+    else:
+        make(args, outfile)
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])
