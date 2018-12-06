@@ -87,7 +87,7 @@ class build_mo(Command):
         file = os.path.join(dest, domain + ".mo")
         self.outputs.append(file)
         if not self.dry_run:
-            msgfmt.make(path, file)
+            self.make_file(path, file, msgfmt.make, (path, file))
             
     def get_outputs(self):
         return self.outputs
