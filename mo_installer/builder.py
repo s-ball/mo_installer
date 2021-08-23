@@ -2,7 +2,10 @@ from setuptools.command.build_py import build_py as _build_py
 from distutils.command.build import build as _build
 from distutils.cmd import Command
 from distutils.errors import DistutilsSetupError
-from .vendor import msgfmt
+try:
+    from .vendor import msgfmt
+except SyntaxError:
+    from .vendor import msgfmt_2 as msgfmt
 import os.path
 import re
 

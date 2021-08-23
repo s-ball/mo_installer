@@ -1,5 +1,8 @@
 from unittest import TestCase
-from unittest.mock import Mock, patch
+try:
+    from unittest.mock import Mock, patch
+except ImportError:
+    from mock import Mock, patch
 from mo_installer import builder
 from mo_installer.builder import build, build_mo, build_py
 from mo_installer.builder import validate_src, validate_dir
