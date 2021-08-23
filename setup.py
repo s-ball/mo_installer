@@ -34,6 +34,8 @@ setup(
         },
     classifiers = [
         "Development Status :: 4 - Beta",
+        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: 3.4",
@@ -46,7 +48,7 @@ setup(
         "Operating System :: OS Independent",
         "Topic :: Software Development :: Internationalization",
         ],
-    python_requires=">=3",
+    python_requires=">=2.7",
     tests_require = ["pyfakefs"],
     entry_points = {
         "distutils.commands": [
